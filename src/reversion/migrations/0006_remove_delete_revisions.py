@@ -4,11 +4,17 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
+from begood_sites.models import VersionSite
+
 class Migration(DataMigration):
 
     def forwards(self, orm):
         "Write your forwards methods here."
         orm.Version.objects.filter(type=2).delete()
+        # Remove the references from begood-sites VersionSite
+        # Otherwise postgres will complain about it still refering to
+        # Revisions.
+        VersionSite.objects.filter(revision__version__isnull=True).delete()
         orm.Revision.objects.filter(version__isnull=True).delete()
 
     def backwards(self, orm):
